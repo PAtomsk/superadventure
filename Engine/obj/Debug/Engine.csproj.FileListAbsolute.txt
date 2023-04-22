@@ -1,0 +1,6 @@
+F:\.PROJEKT\SuperAdventure\Engine\bin\Debug\Engine.dll
+F:\.PROJEKT\SuperAdventure\Engine\bin\Debug\Engine.pdb
+F:\.PROJEKT\SuperAdventure\Engine\obj\Debug\Engine.csprojAssemblyReference.cache
+F:\.PROJEKT\SuperAdventure\Engine\obj\Debug\Engine.csproj.CoreCompileInputs.cache
+F:\.PROJEKT\SuperAdventure\Engine\obj\Debug\Engine.dll
+F:\.PROJEKT\SuperAdventure\Engine\obj\Debug\Engine.pdb
