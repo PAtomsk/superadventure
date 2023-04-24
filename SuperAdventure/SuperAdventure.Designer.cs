@@ -61,7 +61,7 @@
             this.label1.Size = new System.Drawing.Size(25, 13);
             this.label1.TabIndex = 0;
             this.label1.Text = "HP:";
-            this.label1.Click += new System.EventHandler(this.label1_Click);
+           // this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
             // label2
             // 
@@ -138,7 +138,7 @@
             this.cboWeapons.Name = "cboWeapons";
             this.cboWeapons.Size = new System.Drawing.Size(121, 21);
             this.cboWeapons.TabIndex = 9;
-            this.cboWeapons.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            //this.cboWeapons.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // cboPotions
             // 
@@ -286,7 +286,7 @@
             this.Controls.Add(this.label1);
             this.Name = "SuperAdventure";
             this.Text = "Adventure Time";
-            this.Load += new System.EventHandler(this.SuperAdventure_Load);
+            //this.Load += new System.EventHandler(this.SuperAdventure_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvInventory)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvQuests)).EndInit();
             this.ResumeLayout(false);
