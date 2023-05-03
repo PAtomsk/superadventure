@@ -278,19 +278,24 @@ namespace SuperAdventure
             }
         }
 
+        private void RefreshUI()
+        {
+            lblHP.Text = _player.CurrentHP.ToString();
+            lblGold.Text = _player.Gold.ToString();
+            lblExp.Text = _player.Exp.ToString();
+            lblLvl.Text = _player.Lvl.ToString();
+
+            UpdateInventoryListInUI();
+            UpdatePotionListInUI();
+            UpdateQuestListInUI();
+        }
+
         private void btnUseWeapon_Click(object sender, EventArgs e)
         {
             // get the currently selected weapon from the cboWeapons combobox
             Weapon currentWeapon = (Weapon)cboWeapons.SelectedItem;
 
-            // determine the amount of damage to do to the monster
-            int damageToMonster = RandomNumberGenerator.NumberBetween(currentWeapon.MinDMG, currentWeapon.MaxDMG);
-            
-            //apply the damage to the monsters current hp
-            _currentMonster.CurrentHP -= damageToMonster;
-
-            //display message
-            rtbMessages.Text += "You hit the" + _currentMonster.Name + " for " + damageToMonster.ToString() + " points." + Environment.NewLine;
+            PlayerAttack(currentWeapon);
 
             // check if the monster is dead
             if(_currentMonster.CurrentHP <= 0)
@@ -299,62 +304,10 @@ namespace SuperAdventure
                 rtbMessages.Text += Environment.NewLine;
                 rtbMessages.Text += "You defeated the " + _currentMonster.Name + Environment.NewLine;
 
-                //gib xp
-                _player.Exp += _currentMonster.RewardExp;
-                rtbMessages.Text += "You receive " + _currentMonster.RewardExp + " experience points!" + Environment.NewLine;
-
-                //gib gold
-                _player.Exp += _currentMonster.RewardGold;
-                rtbMessages.Text += "You receive " + _currentMonster.RewardGold + " gold!" + Environment.NewLine;
-
-                //gib loot
-                List<InventoryItem> lootedItems = new List<InventoryItem>();
-
-                //add items to the lootedItems list, comparing a random number to the drop percentage
-                foreach(LootItem lootItem in _currentMonster.LootTable)
-                {
-                    if(RandomNumberGenerator.NumberBetween(1,100) <= lootItem.DropPercentage)
-                    {
-                        lootedItems.Add(new InventoryItem(lootItem.Details, 1));
-                    }
-                }   
-                
-                //if no items were randomly selected, then add the default loot items
-                if(lootedItems.Count == 0)
-                {
-                    foreach(LootItem lootItem in _currentMonster.LootTable)
-                    {
-                        if(lootItem.IsDefaultItem)
-                        {
-                            lootedItems.Add(new InventoryItem(lootItem.Details, 1));
-                        }    
-                    }
-                }
-                
-                // add booty to the player inventory!
-                foreach(InventoryItem inventoryItem in lootedItems)
-                {
-                    _player.AddItemToInventory(inventoryItem.Details);
-                    
-                    if(inventoryItem.Quantity==1)
-                    {
-                        rtbMessages.Text += "You loot " + inventoryItem.Details.Name + Environment.NewLine;
-                    }
-                    else
-                    {
-                        rtbMessages.Text += "You loot " + inventoryItem.Details.NamePlural + Environment.NewLine;
-                    }
-                }
+                GiveRewards();
 
                 //refresh players information and inventory controls
-                lblHP.Text = _player.CurrentHP.ToString();
-                lblGold.Text=_player.Gold.ToString();
-                lblExp.Text= _player.Exp.ToString();
-                lblLvl.Text = _player.Lvl.ToString();
-
-                UpdateInventoryListInUI();
-                UpdatePotionListInUI();
-                UpdateQuestListInUI();
+                RefreshUI();
 
                 //add a blank line to the messages box, just for DEM STYLE POINTS
                 rtbMessages.Text += Environment.NewLine;
@@ -366,7 +319,7 @@ namespace SuperAdventure
             {
                 //monster not dead. panik.
                 //how hard did he spank you, daddy?
-                MonsterAttack(_currentMonster, _player);
+                MonsterAttack();
             }
         }
 
@@ -375,11 +328,107 @@ namespace SuperAdventure
             // get the currently selected potion from the combobox
             HealingPotion potion = (HealingPotion)cboPotions.SelectedItem;
 
+            DrinkPotion(potion);
+
+            // monster gets its turn to attack
+            MonsterAttack();
+
+            //refresh players information and inventory controls
+            RefreshUI();
+        }
+
+        private void PlayerAttack(Weapon currentWeapon)
+        {
+            // determine the amount of damage to do to the monster
+            int damageToMonster = RandomNumberGenerator.NumberBetween(currentWeapon.MinDMG, currentWeapon.MaxDMG);
+
+            //apply the damage to the monsters current hp
+            _currentMonster.CurrentHP -= damageToMonster;
+
+            //display message
+            rtbMessages.Text += "You hit the " + _currentMonster.Name + " for " + damageToMonster.ToString() + " points." + Environment.NewLine;
+        }
+
+        private void GiveRewards()
+        {
+            //gib xp
+            _player.Exp += _currentMonster.RewardExp;
+            rtbMessages.Text += "You receive " + _currentMonster.RewardExp + " experience points!" + Environment.NewLine;
+
+            //gib gold
+            _player.Gold += _currentMonster.RewardGold;
+            rtbMessages.Text += "You receive " + _currentMonster.RewardGold + " gold!" + Environment.NewLine;
+
+            //gib loot
+            List<InventoryItem> lootedItems = new List<InventoryItem>();
+
+            //add items to the lootedItems list, comparing a random number to the drop percentage
+            foreach (LootItem lootItem in _currentMonster.LootTable)
+            {
+                if (RandomNumberGenerator.NumberBetween(1, 100) <= lootItem.DropPercentage)
+                {
+                    lootedItems.Add(new InventoryItem(lootItem.Details, 1));
+                }
+            }
+
+            //if no items were randomly selected, then add the default loot items
+            if (lootedItems.Count == 0)
+            {
+                foreach (LootItem lootItem in _currentMonster.LootTable)
+                {
+                    if (lootItem.IsDefaultItem)
+                    {
+                        lootedItems.Add(new InventoryItem(lootItem.Details, 1));
+                    }
+                }
+            }
+
+            // add booty to the player inventory!
+            foreach (InventoryItem inventoryItem in lootedItems)
+            {
+                _player.AddItemToInventory(inventoryItem.Details);
+
+                if (inventoryItem.Quantity == 1)
+                {
+                    rtbMessages.Text += "You loot " + inventoryItem.Details.Name + Environment.NewLine;
+                }
+                else
+                {
+                    rtbMessages.Text += "You loot " + inventoryItem.Details.NamePlural + Environment.NewLine;
+                }
+            }
+        }
+
+        private void MonsterAttack()
+        {
+            int damagetoPlayer = RandomNumberGenerator.NumberBetween(0, _currentMonster.MaxDMG);
+
+            //display message
+            rtbMessages.Text += "You received " + damagetoPlayer.ToString() + " damage from " + _currentMonster.Name + Environment.NewLine;
+
+            //subtract damage from players hp
+            _player.CurrentHP -= damagetoPlayer;
+
+            //refresh players hp in ui
+            lblHP.Text = _player.CurrentHP.ToString();
+
+            if (_player.CurrentHP <= 0)
+            {
+                //display message
+                rtbMessages.Text += "You died." + Environment.NewLine;
+
+                //move player to "Home"
+                MoveTo(World.LocationByID(World.LOCATION_ID_HOME));
+            }
+        }
+
+        private void DrinkPotion(HealingPotion potion)
+        {
             // add healing amount to the current player hp
             _player.CurrentHP += potion.AmountToHeal;
 
             // current hp cant exceed max hp
-            if(_player.CurrentHP>_player.MaxHP)
+            if (_player.CurrentHP > _player.MaxHP)
             {
                 _player.CurrentHP = _player.MaxHP;
             }
@@ -393,40 +442,9 @@ namespace SuperAdventure
                     break;
                 }
             }
-
             //display message
             rtbMessages.Text += "You drink a " + potion.Name + Environment.NewLine;
-
-            // monster gets its turn to attack
-            MonsterAttack(_currentMonster, _player);
-
-            //refresh players information and inventory controls
-            lblHP.Text = _player.CurrentHP.ToString();
-            UpdateInventoryListInUI();
-            UpdatePotionListInUI();
         }
-
-        private void MonsterAttack(Monster currentMonster, Player playerCharacter)
-        {
-            int damagetoPlayer = RandomNumberGenerator.NumberBetween(0, currentMonster.MaxDMG);
-
-            //display message
-            rtbMessages.Text += "You received " + damagetoPlayer.ToString() + " damage from " + currentMonster.Name + Environment.NewLine;
-
-            //subtract damage from players hp
-            playerCharacter.CurrentHP -= damagetoPlayer;
-
-            //refresh players hp in ui
-            lblHP.Text = playerCharacter.CurrentHP.ToString();
-
-            if (playerCharacter.CurrentHP <= 0)
-            {
-                //display message
-                rtbMessages.Text += "You died." + Environment.NewLine;
-
-                //move player to "Home"
-                MoveTo(World.LocationByID(World.LOCATION_ID_HOME));
-            }
-        }
+  
     }
 }
